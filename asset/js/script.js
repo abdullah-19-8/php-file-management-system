@@ -7,25 +7,35 @@ document.getElementById('deleteFile').addEventListener('click', deleteFiles);
 
 function deleteFiles() {
     const selectedFiles = getSelectedFiles();
-    if (selectedFiles.length === 0) {
-        alert('Please select at least one file to delete.');
-    } else {
-        const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    console.log(xhr.responseText);
-                    getFiles();
-                } else {
-                    alert('An error occurred while deleting the selected files.');
-                }
-            }
-        };
-        xhr.open('DELETE', 'controller/file-manager.php');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify({ files: selectedFiles }));
+    if (!selectedFiles || selectedFiles.length === 0) {
+        alert('Please select one or more files to be deleted.');
+        return;
     }
+    
+    const confirmDelete = confirm('Are you sure you want to delete the selected file(s)? This action cannot be undone.');
+    if (!confirmDelete) {
+        return;
+    }
+    
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
+                getFiles();
+                alert('The selected file(s) have been deleted.');
+            } else {
+                alert('An error occurred while deleting the selected files.');
+            }
+        }
+    };
+    
+    xhr.open('DELETE', 'controller/file-manager.php');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({ files: selectedFiles }));
 }
+
+
 
 document.getElementById('upload-form').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -71,7 +81,8 @@ function getFiles() {
 document.getElementById('createFolder').addEventListener('click', createFolder);
 
 function createFolder() {
-    const folderName = document.getElementById('foldername').value;
+    const folderNameField = document.getElementById('foldername');
+    const folderName = folderNameField.value;
     const path = document.getElementById('directory').innerHTML;
     if (folderName.length > 1) {
         const formData = new FormData();
@@ -90,10 +101,14 @@ function createFolder() {
         };
         xhr.open('POST', 'controller/file-manager.php');
         xhr.send(formData);
+        
+        // Clear the folder name field after creating the folder
+        folderNameField.value = '';
     } else {
         alert('Please enter the folder name.');
     }
 }
+
 
 let list = document.querySelector("#file-list");
 
@@ -101,9 +116,24 @@ let renameBtn = document.getElementById('rename');
 renameBtn.addEventListener('click', handleRenameFile);
 
 function handleRenameFile() {
-    const fileToRename = getSelectedFiles()[0].split('.');
+    const selectedFiles = getSelectedFiles();
+    
+    if (selectedFiles.length === 0) {
+        alert('Please select a file to rename.');
+        return;
+    }
+
+    if (selectedFiles.length > 1) {
+        alert('Please select only one file to rename.');
+        return;
+    }
+
+    const fullPath = selectedFiles[0];
+    const fileName = fullPath.split('/').pop();
+    const fileToRename = fileName.split('.');
     const nameField = document.getElementById('renametext');
     const extensionField = document.getElementById('extension');
+
     if (fileToRename.length === 1) {
         nameField.value = fileToRename[0];
         extensionField.innerHTML = 'dir';
@@ -111,7 +141,13 @@ function handleRenameFile() {
         nameField.value = fileToRename[0];
         extensionField.innerHTML = '.' + fileToRename[1];
     }
+
+    let fileRenameModal = new bootstrap.Modal(document.getElementById('fileRenameModal'), {});
+    fileRenameModal.show();
 }
+
+
+
 
 document.getElementById('renameFile').addEventListener('click', renameFile);
 

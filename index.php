@@ -39,7 +39,7 @@ $dir_contents = array_diff(scandir($home_dir), array('..', '.'));
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#fileDeleteModal">Delete</button>
                 </li> 
                 <li class="nav-item">
-                    <button type="button" id="rename" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#fileRenameModal">Rename</button>
+                <button type="button" id="rename" class="btn btn-light">Rename</button>
                 </li>
                 <li class="nav-item">
                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#folderCreateModal">New Folder</button>

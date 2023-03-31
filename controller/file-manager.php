@@ -66,6 +66,12 @@ function handleDeleteRequest()
     $requestBody = file_get_contents('php://input');
     $data = json_decode($requestBody, true);
 
+    if (!isset($data['files'])) {
+        http_response_code(400);
+        echo json_encode(['message' => 'No files specified.']);
+        return;
+    }
+
     $files_to_delete = $data['files'];
     deleteFiles($files_to_delete);
 }
